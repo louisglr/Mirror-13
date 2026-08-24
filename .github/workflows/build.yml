@@ -1,0 +1,35 @@
+name: Build MIRROR
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Find built plugins
+        run: find build -name "*.component" -o -name "*.vst3"
+
+      - name: Upload AU component
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mirror-AU
+          path: build/Mirror_artefacts/Release/AU/*.component
+
+      - name: Upload VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mirror-VST3
+          path: build/Mirror_artefacts/Release/VST3/*.vst3
